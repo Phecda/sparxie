@@ -1,18 +1,25 @@
 package me.phecda.sparxie.ui.navigation
 
-object Routes {
-    const val ClientGraph = "client"
-    const val ClientHome = "client/home"
+import androidx.navigation3.runtime.NavKey
+import kotlinx.serialization.Serializable
 
-    const val ServerGraph = "server"
-    const val ServerHome = "server/home"
-    const val ServerBindAddress = "server/bind-address"
+@Serializable
+data object ClientHome : NavKey
 
-    const val MoreGraph = "more"
-    const val MoreHome = "more/home"
-    const val Settings = "more/settings"
-    const val Licenses = "more/licenses"
-    const val LicenseDetail = "more/licenses/{licenseId}"
+@Serializable
+data object ServerHome : NavKey
 
-    const val LicenseIdArgument = "licenseId"
-}
+@Serializable
+data object ServerBindAddress : NavKey
+
+@Serializable
+data object MoreHome : NavKey
+
+@Serializable
+data object Settings : NavKey
+
+@Serializable
+data object Licenses : NavKey
+
+@Serializable
+data class LicenseDetail(val licenseId: String) : NavKey
