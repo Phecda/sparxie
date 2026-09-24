@@ -101,34 +101,28 @@ Android 路线不等待 iOS，也不依赖 iOS 的接口或阶段结果。
 
 **验收**：Android 可从三个一级入口进入目标页面，页面路径和返回行为可用。
 
-### A2 — Android iperf3 P0 集成
+### A2 — Android iperf3 集成
 
 - 选择并固定 Android 端的 iperf3 来源和构建方式。
-- 提供只覆盖 P0 配置的 Android 内部 Client/Server 启动、停止、状态和事件能力。
+- 提供后续 P0 Client/Server 所需的 Android native 调用基础。
 - 明确 Android 自己的线程、取消、错误和资源释放语义。
-- 不在 A2/P0 中加入 P1、P2 或 P3 配置。
 
-**验收**：Android native 层可以使用 P0 配置在前台启动和停止 Client/Server，成功和失败路径均能结束，且没有遗留运行线程或 native 资源。
+**验收**：Android 可构建并加载 iperf3 native 产物，底层调用基础和资源边界明确；本阶段不实现 Client/Server 页面、配置流程或端到端测试。
 
-### A3 — Android Client P0
-
-- 将 Client 页面接入 Android iperf3 P0 能力。
-- 实现 Server Address、Server Port、Parallel Streams。
-- 使用 P0 固定的 Upload、TCP 和默认时长行为。
-- 实现启动、停止、运行状态、错误展示和重复操作处理。
-
-**验收**：Android Client 可以使用 P0 配置完成前台 TCP Upload 测试，默认值与 RNExplorer 当前默认值一致。
-
-### A4 — Android Server P0
+### A3 — Android Client/Server P0
 
 - 将 Server 页面接入 Android iperf3 P0 能力。
 - 实现 Server Port。
+- 将 Client 页面接入 Android iperf3 P0 能力。
+- 实现 Server Address、Server Port、Parallel Streams。
+- 实现 Client/Server 的 P0 启动、停止、状态、错误和资源释放流程。
+- 使用 P0 固定的 Upload、TCP 和默认时长行为。
 - 默认监听所有可用地址，不开放 One-off、Bind Address 和其他 P1 配置。
-- 实现启动、停止、运行状态、错误展示和重复操作处理。
+- 实现页面状态、错误展示和重复操作处理。
 
-**验收**：Android Server 可以使用 P0 配置完成前台监听和停止，能与 P0 Client 互通。
+**验收**：Android Client 可以使用 P0 配置完成前台 TCP Upload 测试；Android Server 可以使用 P0 配置完成前台监听和停止，并能与 P0 Client 互通。
 
-### A5 — Android Client/Server P1
+### A4 — Android Client/Server P1
 
 - 在 P0 Client/Server 验收完成后，接入 P1 配置。
 - 扩展 Client 的方向、时长、协议、bitrate、绑定地址、连接超时和报告间隔。
@@ -137,7 +131,7 @@ Android 路线不等待 iOS，也不依赖 iOS 的接口或阶段结果。
 
 **验收**：Android Client/Server 可完成原 `ROADMAP.md` P1 范围内的前台测试，P0 行为不回归。
 
-### A6 — Android More
+### A5 — Android More
 
 - 实现 Settings 页面入口。
 - 实现 Licenses 列表和详情入口。
@@ -145,7 +139,7 @@ Android 路线不等待 iOS，也不依赖 iOS 的接口或阶段结果。
 
 **验收**：Android 可从 More 进入 Settings 和 Licenses，并能返回一级入口。
 
-### A7 — Android 必要测试
+### A6 — Android 必要测试
 
 - 覆盖 P0 Client/Server 配置和默认值。
 - 覆盖 P0 输入校验、启动、停止、成功、失败和重复操作。
@@ -166,34 +160,28 @@ iOS 路线不等待 Android，也不依赖 Android 的接口或阶段结果。
 
 **验收**：iOS 可从三个一级入口进入目标页面，页面路径和返回行为可用。
 
-### I2 — iOS iperf3 P0 集成
+### I2 — iOS iperf3 集成
 
 - 选择并固定 iOS 端的 iperf3 来源和构建方式。
-- 提供只覆盖 P0 配置的 iOS 内部 Client/Server 启动、停止、状态和事件能力。
+- 提供后续 P0 Client/Server 所需的 iOS native 调用基础。
 - 明确 iOS 自己的线程、取消、错误和资源释放语义。
-- 不在 I2/P0 中加入 P1、P2 或 P3 配置。
 
-**验收**：iOS native 层可以使用 P0 配置在前台启动和停止 Client/Server，成功和失败路径均能结束。
+**验收**：iOS 可构建并加载 iperf3 native 产物，底层调用基础和资源边界明确；本阶段不实现 Client/Server 页面、配置流程或端到端测试。
 
-### I3 — iOS Client P0
+### I3 — iOS Client/Server P0
 
 - 将 Client 页面接入 iOS iperf3 P0 能力。
 - 实现 Server Address、Server Port、Parallel Streams。
 - 使用 P0 固定的 Upload、TCP 和默认时长行为。
-- 实现启动、停止、运行状态、错误展示和重复操作处理。
-
-**验收**：iOS Client 可以使用 P0 配置完成前台 TCP Upload 测试，默认值与 RNExplorer 当前默认值一致。
-
-### I4 — iOS Server P0
-
 - 将 Server 页面接入 iOS iperf3 P0 能力。
 - 实现 Server Port。
+- 实现 Client/Server 的 P0 启动、停止、状态、错误和资源释放流程。
 - 默认监听所有可用地址，不开放 One-off、Bind Address 和其他 P1 配置。
-- 实现启动、停止、运行状态、错误展示和重复操作处理。
+- 实现页面状态、错误展示和重复操作处理。
 
-**验收**：iOS Server 可以使用 P0 配置完成前台监听和停止，能与 P0 Client 互通。
+**验收**：iOS Client 可以使用 P0 配置完成前台 TCP Upload 测试；iOS Server 可以使用 P0 配置完成前台监听和停止，并能与 P0 Client 互通。
 
-### I5 — iOS Client/Server P1
+### I4 — iOS Client/Server P1
 
 - 在 P0 Client/Server 验收完成后，接入 P1 配置。
 - 扩展 Client 的方向、时长、协议、bitrate、绑定地址、连接超时和报告间隔。
@@ -202,7 +190,7 @@ iOS 路线不等待 Android，也不依赖 Android 的接口或阶段结果。
 
 **验收**：iOS Client/Server 可完成原 `ROADMAP.md` P1 范围内的前台测试，P0 行为不回归。
 
-### I6 — iOS More
+### I5 — iOS More
 
 - 实现 Settings 页面入口。
 - 实现 Licenses 列表和详情入口。
@@ -210,7 +198,7 @@ iOS 路线不等待 Android，也不依赖 Android 的接口或阶段结果。
 
 **验收**：iOS 可从 More 进入 Settings 和 Licenses，并能返回一级入口。
 
-### I7 — iOS 必要测试
+### I6 — iOS 必要测试
 
 - 覆盖 P0 Client/Server 配置和默认值。
 - 覆盖 P0 输入校验、启动、停止、成功、失败和重复操作。
