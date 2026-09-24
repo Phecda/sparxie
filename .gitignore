@@ -1,1 +1,9 @@
 .DS_Store
+
+# Native iperf3 build intermediates. The generated Android AAR is kept in
+# android/app/libs and is intentionally not ignored.
+native/android/.gradle/
+native/android/iperf3-native/.cxx/
+native/android/iperf3-native/build/
+native/ios/build/
+native/ios/dist/

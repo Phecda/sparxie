@@ -38,6 +38,7 @@ android {
 }
 
 dependencies {
+    implementation(files("libs/iperf3-native.aar"))
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.core.ktx)
     implementation(libs.material)
