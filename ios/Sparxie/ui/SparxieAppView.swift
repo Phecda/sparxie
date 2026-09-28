@@ -29,4 +29,5 @@ struct SparxieAppView: View {
 
 #Preview {
     SparxieAppView()
+        .environment(IperfSessionRuntime.shared)
 }

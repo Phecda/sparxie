@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct ServerView: View {
-    @State private var runtime = IperfSessionRuntime.shared
+    @Environment(IperfSessionRuntime.self) private var runtime
     @State private var serverPort = "5201"
     @State private var actionError: String?
 
@@ -142,4 +142,5 @@ struct ServerView: View {
     NavigationStack {
         ServerView()
     }
+    .environment(IperfSessionRuntime.shared)
 }

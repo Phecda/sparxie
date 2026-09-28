@@ -83,7 +83,6 @@ final class IperfSessionRuntime {
 
     private(set) var state: IperfSessionState = .idle
     private(set) var jsonEvents: [IperfJSONEvent] = []
-    var onJSONEvent: ((IperfJSONEvent) -> Void)?
 
     private let executor: IperfSessionExecutor
     private var nextJSONEventID: UInt64 = 0
@@ -208,8 +207,6 @@ final class IperfSessionRuntime {
         if jsonEvents.count > Self.maxJSONEventCount {
             jsonEvents.removeFirst(jsonEvents.count - Self.maxJSONEventCount)
         }
-
-        onJSONEvent?(event)
     }
 
     private static func eventName(in json: String) -> String? {
