@@ -6,8 +6,13 @@
 	objectVersion = 90;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		000000000000000000000150 /* Iperf3.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 000000000000000000000121 /* Iperf3.xcframework */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		000000000000000000000120 /* Sparxie.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Sparxie.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		000000000000000000000121 /* Iperf3.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; path = Frameworks/Iperf3.xcframework; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -22,6 +27,7 @@
 		000000000000000130000000 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			files = (
+				000000000000000000000150 /* Iperf3.xcframework in Frameworks */,
 			);
 		};
 /* End PBXFrameworksBuildPhase section */
@@ -31,6 +37,7 @@
 			isa = PBXGroup;
 			children = (
 				000000000000000000000010 /* Sparxie */,
+				000000000000000000000121 /* Iperf3.xcframework */,
 				000000000000000000000020 /* Products */,
 			);
 			sourceTree = "<group>";
