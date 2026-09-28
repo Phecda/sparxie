@@ -35,7 +35,7 @@ import me.phecda.sparxie.ui.screens.LicenseDetailScreen
 import me.phecda.sparxie.ui.screens.LicensesScreen
 import me.phecda.sparxie.ui.screens.MoreScreen
 import me.phecda.sparxie.ui.screens.ServerBindAddressScreen
-import me.phecda.sparxie.ui.screens.ServerScreen
+import me.phecda.sparxie.ui.screens.ServerRoute
 import me.phecda.sparxie.ui.screens.SettingsScreen
 
 private data class TopLevelDestination(
@@ -83,9 +83,7 @@ fun SparxieApp() {
         entry<ServerHome>(metadata = metadata {
             put(TopLevelRouteMetadataKey, ServerHome as NavKey)
         }) {
-            ServerScreen(
-                onBindAddressClick = { navigator.navigate(ServerBindAddress) },
-            )
+            ServerRoute()
         }
         entry<ServerBindAddress>(metadata = metadata {
             put(TopLevelRouteMetadataKey, ServerHome as NavKey)
