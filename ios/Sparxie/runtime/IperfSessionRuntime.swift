@@ -31,7 +31,8 @@ struct IperfServerConfiguration: Sendable {
     }
 }
 
-struct IperfJSONEvent: Sendable, Equatable {
+struct IperfJSONEvent: Identifiable, Sendable, Equatable {
+    let id: UInt64
     let name: String?
     let json: String
 }
@@ -81,9 +82,13 @@ final class IperfSessionRuntime {
     static let shared = IperfSessionRuntime()
 
     private(set) var state: IperfSessionState = .idle
+    private(set) var jsonEvents: [IperfJSONEvent] = []
     var onJSONEvent: ((IperfJSONEvent) -> Void)?
 
     private let executor: IperfSessionExecutor
+    private var nextJSONEventID: UInt64 = 0
+
+    private static let maxJSONEventCount = 100
 
     private init() {
         executor = IperfSessionExecutor()
@@ -153,6 +158,7 @@ final class IperfSessionRuntime {
             }
         )
 
+        jsonEvents.removeAll(keepingCapacity: true)
         state = .starting(configuration.kind)
     }
 
@@ -191,11 +197,19 @@ final class IperfSessionRuntime {
     }
 
     private func deliverJSON(_ json: String) {
-        guard let onJSONEvent else {
-            return
+        let event = IperfJSONEvent(
+            id: nextJSONEventID,
+            name: Self.eventName(in: json),
+            json: json
+        )
+        nextJSONEventID += 1
+
+        jsonEvents.append(event)
+        if jsonEvents.count > Self.maxJSONEventCount {
+            jsonEvents.removeFirst(jsonEvents.count - Self.maxJSONEventCount)
         }
 
-        onJSONEvent(IperfJSONEvent(name: Self.eventName(in: json), json: json))
+        onJSONEvent?(event)
     }
 
     private static func eventName(in json: String) -> String? {
