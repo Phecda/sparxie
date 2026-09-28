@@ -26,3 +26,7 @@ target_link_libraries(iperf3
     ${ANDROID_LIB}
     m
 )
+
+target_link_options(iperf3 PRIVATE
+    "-Wl,-z,max-page-size=16384"
+)
