@@ -8,7 +8,7 @@ val ndkVersionOverride = providers.gradleProperty("iperfNdkVersion")
     .orElse(defaultNdkVersion)
 
 android {
-    namespace = "me.phecda.sparxie.iperf3"
+    namespace = "me.phecda.iperf3"
     compileSdk = 37
     ndkVersion = ndkVersionOverride.get()
 

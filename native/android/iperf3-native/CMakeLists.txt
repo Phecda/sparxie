@@ -9,7 +9,10 @@ file(GLOB IPERF_SOURCES CONFIGURE_DEPENDS
     "${CMAKE_CURRENT_LIST_DIR}/../../iperf3/src/*.c"
 )
 
-add_library(iperf3 SHARED ${IPERF_SOURCES})
+add_library(iperf3 SHARED
+    src/main/cpp/iperf3_jni.c
+    ${IPERF_SOURCES}
+)
 
 target_include_directories(iperf3 PRIVATE
     "${CMAKE_CURRENT_LIST_DIR}/../../iperf3/src"
