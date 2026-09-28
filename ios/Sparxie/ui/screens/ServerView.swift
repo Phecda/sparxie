@@ -29,7 +29,6 @@ struct ServerView: View {
                 .listRowSeparator(.hidden)
             }
         }
-        .listStyle(.insetGrouped)
         .navigationTitle("Server")
         .navigationDestination(for: ServerDestination.self) { destination in
             switch destination {
