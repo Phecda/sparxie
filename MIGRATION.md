@@ -111,16 +111,48 @@ Android 路线不等待 iOS，也不依赖 iOS 的接口或阶段结果。
 
 ### A3 — Android Client/Server P0
 
-- 将 Server 页面接入 Android iperf3 P0 能力。
-- 实现 Server Port。
-- 将 Client 页面接入 Android iperf3 P0 能力。
-- 实现 Server Address、Server Port、Parallel Streams。
-- 实现 Client/Server 的 P0 启动、停止、状态、错误和资源释放流程。
-- 使用 P0 固定的 Upload、TCP 和默认时长行为。
-- 默认监听所有可用地址，不开放 One-off、Bind Address 和其他 P1 配置。
-- 实现页面状态、错误展示和重复操作处理。
+A3 按可独立验收的垂直切片推进，不按单个页面字段拆分。A3.1 是后续页面接入的前置目标，A3.2/A3.3 分别完成 Server 和 Client 的 P0 闭环，A3.4 负责完整互通和生命周期回归。
 
-**验收**：Android Client 可以使用 P0 配置完成前台 TCP Upload 测试；Android Server 可以使用 P0 配置完成前台监听和停止，并能与 P0 Client 互通。
+#### A3.1 — Android P0 Session Runtime
+
+- 提供后续 Client/Server 页面所需的 Android native 调用入口和 Kotlin session 协调能力。
+- 提供 Client/Server P0 配置模型：Client 的 Server Address、Server Port、Parallel Streams；Server 的 Server Port。
+- 固定 P0 行为：TCP、Client Upload、默认 Duration；Server 监听所有可用地址。
+- 将阻塞的 iperf Client/Server 调用放在专用串行后台执行环境中。
+- 保证进程内同一时间最多运行一个 iperf session。
+- 明确启动、停止、成功、失败、重复操作和资源释放语义。
+- 通过 `iperf_interrupt` 实现取消，由运行线程负责最终释放 `iperf_test`。
+
+**验收**：Android native 层可以验证 P0 Client/Server 的启动、停止、成功、失败和资源释放流程；本目标不接入 Compose 页面，不实现 P1 配置和端到端互通。
+
+#### A3.2 — Android Server P0
+
+- 将 Server 页面接入 Android iperf3 P0 能力。
+- 实现 Server Port，默认值为 `5201`。
+- 实现 Server 的启动、停止、运行状态、成功、失败和重复操作处理。
+- 使用 Android 原生 Compose/Material 控件，不为追求 iOS 样式一致而新增自定义组件。
+
+**验收**：Android Server 可以使用 P0 配置完成前台监听和停止；启动失败、重复操作和停止后的再次启动均有明确结果。
+
+#### A3.3 — Android Client P0
+
+- 将 Client 页面接入 Android iperf3 P0 能力。
+- 实现 Server Address、Server Port、Parallel Streams，默认值分别按 P0 约定处理。
+- 使用 P0 固定的 Upload、TCP 和默认 Duration 行为。
+- 实现输入校验、启动、停止、运行状态、成功、失败和重复操作处理。
+- 使用 Android 原生 Compose/Material 控件，不为追求 iOS 样式一致而新增自定义组件。
+
+**验收**：Android Client 可以使用 P0 配置完成前台 TCP Upload 测试，并能正确处理无效地址、连接失败、停止和重复操作。
+
+#### A3.4 — Android P0 互通与生命周期回归
+
+- 验证 Android Client 与 Android Server 的 P0 互通。
+- 验证 Android Client 与外部 iperf3 Server 的互通。
+- 验证外部 iperf3 Client 与 Android Server 的互通。
+- 覆盖运行中停止、失败后重新启动、Client/Server 交替启动和重复操作。
+- 覆盖前台页面切换和资源释放，不扩展到后台运行、前台服务或网络切换场景。
+
+**验收**：Android Client/Server 可完成 P0 前台互通，停止、失败、重复启动和资源释放行为不回归。
 
 ### A4 — Android Client/Server P1
 
@@ -170,16 +202,47 @@ iOS 路线不等待 Android，也不依赖 Android 的接口或阶段结果。
 
 ### I3 — iOS Client/Server P0
 
-- 将 Client 页面接入 iOS iperf3 P0 能力。
-- 实现 Server Address、Server Port、Parallel Streams。
-- 使用 P0 固定的 Upload、TCP 和默认时长行为。
-- 将 Server 页面接入 iOS iperf3 P0 能力。
-- 实现 Server Port。
-- 实现 Client/Server 的 P0 启动、停止、状态、错误和资源释放流程。
-- 默认监听所有可用地址，不开放 One-off、Bind Address 和其他 P1 配置。
-- 实现页面状态、错误展示和重复操作处理。
+I3 按可独立验收的垂直切片推进，不按单个页面字段拆分。I3.1 是后续页面接入的前置目标，I3.2/I3.3 分别完成 Server 和 Client 的 P0 闭环，I3.4 负责完整互通和生命周期回归。
 
-**验收**：iOS Client 可以使用 P0 配置完成前台 TCP Upload 测试；iOS Server 可以使用 P0 配置完成前台监听和停止，并能与 P0 Client 互通。
+#### I3.1 — iOS P0 Session Runtime
+
+- 提供 Client/Server P0 配置模型：Client 的 Server Address、Server Port、Parallel Streams；Server 的 Server Port。
+- 固定 P0 行为：TCP、Client Upload、默认 Duration；Server 监听所有可用地址。
+- 提供启动、停止、成功、失败和重复操作所需的 native session 协调能力。
+- 将阻塞的 iperf Client/Server 调用放在专用串行后台执行环境中。
+- 保证进程内同一时间最多运行一个 iperf session。
+- 明确 `iperf_test` 的创建、取消、错误传递和释放边界。
+
+**验收**：native 层可以验证 P0 Client/Server 的启动、停止、成功、失败和资源释放流程；本目标不接入 SwiftUI 页面，不实现 P1 配置和端到端互通。
+
+#### I3.2 — iOS Server P0
+
+- 将 Server 页面接入 iOS iperf3 P0 能力。
+- 实现 Server Port，默认值为 `5201`。
+- 实现 Server 的启动、停止、运行状态、成功、失败和重复操作处理。
+- 使用 iOS 原生 SwiftUI 控件，不为追求 Android 样式一致而新增自定义组件。
+
+**验收**：iOS Server 可以使用 P0 配置完成前台监听和停止；启动失败、重复操作和停止后的再次启动均有明确结果。
+
+#### I3.3 — iOS Client P0
+
+- 将 Client 页面接入 iOS iperf3 P0 能力。
+- 实现 Server Address、Server Port、Parallel Streams，默认值分别按 P0 约定处理。
+- 使用 P0 固定的 Upload、TCP 和默认 Duration 行为。
+- 实现输入校验、启动、停止、运行状态、成功、失败和重复操作处理。
+- 使用 iOS 原生 SwiftUI 控件，不为追求 Android 样式一致而新增自定义组件。
+
+**验收**：iOS Client 可以使用 P0 配置完成前台 TCP Upload 测试，并能正确处理无效地址、连接失败、停止和重复操作。
+
+#### I3.4 — iOS P0 互通与生命周期回归
+
+- 验证 iOS Client 与 iOS Server 的 P0 互通。
+- 验证 iOS Client 与外部 iperf3 Server 的互通。
+- 验证外部 iperf3 Client 与 iOS Server 的互通。
+- 覆盖运行中停止、失败后重新启动、Client/Server 交替启动和重复操作。
+- 覆盖前台页面切换和资源释放，不扩展到后台运行或网络切换场景。
+
+**验收**：iOS Client/Server 可完成 P0 前台互通，停止、失败、重复启动和资源释放行为不回归。
 
 ### I4 — iOS Client/Server P1
 
