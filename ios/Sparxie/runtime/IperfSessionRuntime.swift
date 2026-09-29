@@ -404,6 +404,9 @@ private nonisolated final class IperfSessionExecutor: @unchecked Sendable {
         switch configuration {
         case .client:
             result = iperf_run_client(test)
+            if isStopRequested() {
+                _ = iperf_client_end(test)
+            }
         case .server:
             result = iperf_run_server(test)
         }
