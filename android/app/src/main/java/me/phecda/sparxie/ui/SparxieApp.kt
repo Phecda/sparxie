@@ -34,17 +34,17 @@ import me.phecda.sparxie.ui.navigation.ServerHome
 import me.phecda.sparxie.ui.navigation.Settings
 import me.phecda.sparxie.ui.navigation.TopLevelRouteMetadataKey
 import me.phecda.sparxie.ui.navigation.rememberNavigationState
-import me.phecda.sparxie.ui.screens.ClientRoute
-import me.phecda.sparxie.ui.screens.ClientToolbarAction
-import me.phecda.sparxie.ui.screens.ClientViewModel
-import me.phecda.sparxie.ui.screens.LicenseDetailScreen
-import me.phecda.sparxie.ui.screens.LicensesScreen
-import me.phecda.sparxie.ui.screens.MoreScreen
-import me.phecda.sparxie.ui.screens.ServerBindAddressScreen
-import me.phecda.sparxie.ui.screens.ServerRoute
-import me.phecda.sparxie.ui.screens.ServerToolbarAction
-import me.phecda.sparxie.ui.screens.ServerViewModel
-import me.phecda.sparxie.ui.screens.SettingsScreen
+import me.phecda.sparxie.ui.screens.client.ClientRoute
+import me.phecda.sparxie.ui.screens.client.ClientToolbarAction
+import me.phecda.sparxie.ui.screens.client.ClientViewModel
+import me.phecda.sparxie.ui.screens.licenses.LicenseDetailScreen
+import me.phecda.sparxie.ui.screens.licenses.LicensesScreen
+import me.phecda.sparxie.ui.screens.more.MoreScreen
+import me.phecda.sparxie.ui.screens.server.ServerBindAddressScreen
+import me.phecda.sparxie.ui.screens.server.ServerRoute
+import me.phecda.sparxie.ui.screens.server.ServerToolbarAction
+import me.phecda.sparxie.ui.screens.server.ServerViewModel
+import me.phecda.sparxie.ui.screens.settings.SettingsScreen
 
 private data class TopLevelDestination(
     val route: NavKey,

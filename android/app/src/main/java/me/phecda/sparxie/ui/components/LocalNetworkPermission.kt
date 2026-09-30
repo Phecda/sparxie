@@ -1,4 +1,4 @@
-package me.phecda.sparxie.ui.screens
+package me.phecda.sparxie.ui.components
 
 import android.Manifest
 import android.content.pm.PackageManager

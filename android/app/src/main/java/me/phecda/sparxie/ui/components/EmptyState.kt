@@ -1,4 +1,4 @@
-package me.phecda.sparxie.ui.screens
+package me.phecda.sparxie.ui.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

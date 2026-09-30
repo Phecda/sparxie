@@ -1,4 +1,4 @@
-package me.phecda.sparxie.ui.screens
+package me.phecda.sparxie.ui.screens.licenses
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding

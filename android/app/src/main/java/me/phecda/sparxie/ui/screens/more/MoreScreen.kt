@@ -1,4 +1,4 @@
-package me.phecda.sparxie.ui.screens
+package me.phecda.sparxie.ui.screens.more
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column

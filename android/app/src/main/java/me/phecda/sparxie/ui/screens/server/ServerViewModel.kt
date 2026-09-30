@@ -1,4 +1,4 @@
-package me.phecda.sparxie.ui.screens
+package me.phecda.sparxie.ui.screens.server
 
 import androidx.annotation.StringRes
 import android.app.Application
@@ -13,36 +13,32 @@ import kotlinx.coroutines.flow.update
 import me.phecda.sparxie.R
 import me.phecda.sparxie.SparxieApplication
 import me.phecda.sparxie.runtime.IperfJsonEvent
-import me.phecda.sparxie.runtime.IperfClientConfiguration
+import me.phecda.sparxie.runtime.IperfServerConfiguration
 import me.phecda.sparxie.runtime.IperfSessionRuntime
 import me.phecda.sparxie.runtime.IperfSessionRuntimeException
 import me.phecda.sparxie.runtime.IperfSessionState
 
-data class ClientUiState(
-    val addressInput: String = "",
+data class ServerUiState(
     val portInput: String = "5201",
-    val parallelStreamsInput: String = "1",
     val sessionState: IperfSessionState = IperfSessionState.Idle,
     val jsonEvents: List<IperfJsonEvent> = emptyList(),
     val expandedJsonEventIds: Set<Long> = emptySet(),
     @param:StringRes val actionErrorRes: Int? = null,
 )
 
-class ClientViewModel(application: Application) : AndroidViewModel(application) {
-    private val settingsStore = (application as SparxieApplication).clientSettingsStore
+class ServerViewModel(application: Application) : AndroidViewModel(application) {
+    private val settingsStore = (application as SparxieApplication).serverSettingsStore
     private val runtime = IperfSessionRuntime
     private val localState = MutableStateFlow(LocalState())
 
-    val uiState: StateFlow<ClientUiState> = combine(
+    val uiState: StateFlow<ServerUiState> = combine(
         runtime.state,
         runtime.jsonEvents,
         localState,
         settingsStore.state,
     ) { sessionState, jsonEvents, localState, settings ->
-        ClientUiState(
-            addressInput = settings.addressInput,
+        ServerUiState(
             portInput = settings.portInput,
-            parallelStreamsInput = settings.parallelStreamsInput,
             sessionState = sessionState,
             jsonEvents = jsonEvents.asReversed().toList(),
             expandedJsonEventIds = localState.expandedJsonEventIds,
@@ -51,36 +47,15 @@ class ClientViewModel(application: Application) : AndroidViewModel(application) 
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
-        initialValue = ClientUiState(
-            addressInput = settingsStore.state.value.addressInput,
-            portInput = settingsStore.state.value.portInput,
-            parallelStreamsInput = settingsStore.state.value.parallelStreamsInput,
-        ),
+        initialValue = ServerUiState(portInput = settingsStore.state.value.portInput),
     )
-
-    fun onServerAddressChange(value: String) {
-        settingsStore.setAddress(value)
-    }
 
     fun onServerPortChange(value: String) {
         settingsStore.setPort(value)
     }
 
-    fun onParallelStreamsChange(value: String) {
-        settingsStore.setParallelStreams(value)
-    }
-
     fun onStart() {
-        val settings = settingsStore.state.value
-        val address = settings.addressInput.trim()
-        if (address.isEmpty()) {
-            localState.update {
-                it.copy(actionErrorRes = R.string.error_server_address_empty)
-            }
-            return
-        }
-
-        val port = settings.portInput.trim().toIntOrNull()
+        val port = settingsStore.state.value.portInput.trim().toIntOrNull()
         if (port == null || port !in 1..65_535) {
             localState.update {
                 it.copy(actionErrorRes = R.string.error_server_port_range)
@@ -88,26 +63,12 @@ class ClientViewModel(application: Application) : AndroidViewModel(application) 
             return
         }
 
-        val parallelStreams = settings.parallelStreamsInput.trim().toIntOrNull()
-        if (parallelStreams == null || parallelStreams !in 1..128) {
-            localState.update {
-                it.copy(actionErrorRes = R.string.error_parallel_streams_range)
-            }
-            return
-        }
-
         localState.update { it.copy(actionErrorRes = null) }
         runCatching {
-            runtime.startClient(
-                IperfClientConfiguration(
-                    serverAddress = address,
-                    serverPort = port,
-                    parallelStreams = parallelStreams,
-                ),
-            )
+            runtime.startServer(IperfServerConfiguration(serverPort = port))
         }.onFailure { throwable ->
             localState.update {
-                it.copy(actionErrorRes = clientActionError(throwable))
+                it.copy(actionErrorRes = serverActionError(throwable))
             }
         }
     }
@@ -139,21 +100,17 @@ class ClientViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     private data class LocalState(
-        val addressInput: String = "",
         val portInput: String = "5201",
-        val parallelStreamsInput: String = "1",
         val expandedJsonEventIds: Set<Long> = emptySet(),
         @param:StringRes val actionErrorRes: Int? = null,
     )
 
     @StringRes
-    private fun clientActionError(throwable: Throwable): Int {
+    private fun serverActionError(throwable: Throwable): Int {
         return when (throwable) {
             IperfSessionRuntimeException.AlreadyRunning -> R.string.error_iperf_session_already_running
-            IperfSessionRuntimeException.InvalidServerAddress -> R.string.error_server_address_empty
             IperfSessionRuntimeException.InvalidServerPort -> R.string.error_server_port_range
-            IperfSessionRuntimeException.InvalidParallelStreams -> R.string.error_parallel_streams_range
-            else -> R.string.error_unable_start_client
+            else -> R.string.error_unable_start_server
         }
     }
 }

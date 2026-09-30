@@ -1,4 +1,4 @@
-package me.phecda.sparxie.ui.screens
+package me.phecda.sparxie.ui.screens.client
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import me.phecda.sparxie.R
+import me.phecda.sparxie.ui.components.rememberLocalNetworkStart
 import me.phecda.sparxie.runtime.IperfSessionKind
 import me.phecda.sparxie.runtime.IperfSessionState
 
