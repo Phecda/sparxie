@@ -55,13 +55,13 @@ enum IperfSessionRuntimeError: Error, Equatable, Sendable, LocalizedError {
     var errorDescription: String? {
         switch self {
         case .alreadyRunning:
-            "An iperf session is already running."
+            String(localized: "An iPerf session is already running.")
         case .invalidServerAddress:
-            "Server Address must not be empty."
+            String(localized: "Server Address must not be empty.")
         case .invalidServerPort:
-            "Server Port must be between 1 and 65535."
+            String(localized: "Server Port must be between 1 and 65535.")
         case .invalidParallelStreams:
-            "Parallel Streams must be between 1 and 128."
+            String(localized: "Parallel Streams must be between 1 and 128.")
         }
     }
 }
@@ -500,7 +500,7 @@ private nonisolated final class IperfSessionExecutor: @unchecked Sendable {
         if let error = iperf_strerror(code) {
             message = String(cString: error)
         } else {
-            message = "iperf error \(code)"
+            message = "\(String(localized: "iPerf error")) \(code)"
         }
 
         return IperfSessionFailure(code: code, message: message)

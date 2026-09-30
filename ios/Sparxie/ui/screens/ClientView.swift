@@ -27,8 +27,8 @@ struct ClientView: View {
             }
 
             Section("Status") {
-                LabeledContent("Status", value: clientStatusText)
-                LabeledContent("Error", value: displayError ?? "-")
+                LabeledContent("Status") { Text(clientStatusText) }
+                LabeledContent("Error") { Text(displayError ?? "-") }
             }
 
             Section("Live Data") {
@@ -42,7 +42,7 @@ struct ClientView: View {
                                 .font(.system(.caption, design: .monospaced))
                                 .textSelection(.enabled)
                         } label: {
-                            Text(event.name ?? "event")
+                            Text(event.name ?? String(localized: "event"))
                         }
                     }
                 }
@@ -96,7 +96,7 @@ struct ClientView: View {
         return false
     }
 
-    private var clientStatusText: String {
+    private var clientStatusText: LocalizedStringKey {
         switch runtime.state {
         case .starting(.client):
             "Starting"
@@ -138,13 +138,17 @@ struct ClientView: View {
 
         let portText = serverPort.trimmingCharacters(in: .whitespacesAndNewlines)
         guard let port = Int(portText), (1...65_535).contains(port) else {
-            actionError = "Server Port must be a whole number between 1 and 65535."
+            actionError = String(
+                localized: "Server Port must be a whole number between 1 and 65535."
+            )
             return
         }
 
         let streamsText = parallelStreams.trimmingCharacters(in: .whitespacesAndNewlines)
         guard let streams = Int(streamsText), (1...128).contains(streams) else {
-            actionError = "Parallel Streams must be a whole number between 1 and 128."
+            actionError = String(
+                localized: "Parallel Streams must be a whole number between 1 and 128."
+            )
             return
         }
 

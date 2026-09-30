@@ -16,8 +16,8 @@ struct ServerView: View {
             }
 
             Section("Status") {
-                LabeledContent("Status", value: serverStatusText)
-                LabeledContent("Error", value: displayError ?? "-")
+                LabeledContent("Status") { Text(serverStatusText) }
+                LabeledContent("Error") { Text(displayError ?? "-") }
             }
 
             Section("Live Data") {
@@ -31,7 +31,7 @@ struct ServerView: View {
                                 .font(.system(.caption, design: .monospaced))
                                 .textSelection(.enabled)
                         } label: {
-                            Text(event.name ?? "event")
+                            Text(event.name ?? String(localized: "event"))
                         }
                     }
                 }
@@ -85,7 +85,7 @@ struct ServerView: View {
         return false
     }
 
-    private var serverStatusText: String {
+    private var serverStatusText: LocalizedStringKey {
         switch runtime.state {
         case .starting(.server):
             "Starting"
@@ -121,7 +121,9 @@ struct ServerView: View {
 
         let portText = serverPort.trimmingCharacters(in: .whitespacesAndNewlines)
         guard let port = Int(portText), (1...65_535).contains(port) else {
-            actionError = "Server Port must be a whole number between 1 and 65535."
+            actionError = String(
+                localized: "Server Port must be a whole number between 1 and 65535."
+            )
             return
         }
 

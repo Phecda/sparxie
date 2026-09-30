@@ -1,5 +1,6 @@
 package me.phecda.sparxie.ui
 
+import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Devices
@@ -16,10 +17,12 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.metadata
+import me.phecda.sparxie.R
 import me.phecda.sparxie.ui.navigation.ClientHome
 import me.phecda.sparxie.ui.navigation.AppNavDisplay
 import me.phecda.sparxie.ui.navigation.LicenseDetail
@@ -45,14 +48,14 @@ import me.phecda.sparxie.ui.screens.SettingsScreen
 
 private data class TopLevelDestination(
     val route: NavKey,
-    val label: String,
+    @param:StringRes val labelRes: Int,
     val icon: ImageVector,
 )
 
 private val topLevelDestinations = listOf(
-    TopLevelDestination(ClientHome, "Client", Icons.Default.Devices),
-    TopLevelDestination(ServerHome, "Server", Icons.Default.Dns),
-    TopLevelDestination(MoreHome, "More", Icons.Default.MoreHoriz),
+    TopLevelDestination(ClientHome, R.string.nav_client, Icons.Default.Devices),
+    TopLevelDestination(ServerHome, R.string.nav_server, Icons.Default.Dns),
+    TopLevelDestination(MoreHome, R.string.nav_more, Icons.Default.MoreHoriz),
 )
 
 private val topLevelRoutes: Set<NavKey> = topLevelDestinations
@@ -71,14 +74,14 @@ fun SparxieApp() {
     val currentRoute = navigationState.backStacks[navigationState.topLevelRoute]
         ?.lastOrNull()
     val title = when (val route = currentRoute) {
-        ClientHome -> "Client"
-        ServerHome -> "Server"
-        ServerBindAddress -> "Bind Address"
-        MoreHome -> "More"
-        Settings -> "Settings"
-        Licenses -> "Open Source Licenses"
+        ClientHome -> stringResource(R.string.nav_client)
+        ServerHome -> stringResource(R.string.nav_server)
+        ServerBindAddress -> stringResource(R.string.title_bind_address)
+        MoreHome -> stringResource(R.string.nav_more)
+        Settings -> stringResource(R.string.title_settings)
+        Licenses -> stringResource(R.string.title_open_source_licenses)
         is LicenseDetail -> route.licenseId
-        else -> "Sparxie"
+        else -> stringResource(R.string.app_name)
     }
     val isChildPage = currentRoute !in topLevelRoutes
     val entryProvider = entryProvider<NavKey> {
@@ -137,7 +140,7 @@ fun SparxieApp() {
                         IconButton(onClick = navigator::goBack) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = "Back",
+                                contentDescription = stringResource(R.string.action_back),
                             )
                         }
                     }
@@ -153,10 +156,10 @@ fun SparxieApp() {
                         icon = {
                             Icon(
                                 imageVector = destination.icon,
-                                contentDescription = destination.label,
+                                contentDescription = stringResource(destination.labelRes),
                             )
                         },
-                        label = { Text(destination.label) },
+                        label = { Text(stringResource(destination.labelRes)) },
                     )
                 }
             }

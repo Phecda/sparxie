@@ -22,11 +22,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import me.phecda.sparxie.R
 import me.phecda.sparxie.runtime.IperfSessionKind
 import me.phecda.sparxie.runtime.IperfSessionState
 
@@ -61,7 +63,9 @@ fun ClientToolbarAction(viewModel: ClientViewModel) {
     ) {
         Icon(
             imageVector = if (isClientActive) Icons.Default.Stop else Icons.Default.PlayArrow,
-            contentDescription = if (isClientActive) "Stop Client" else "Start Client",
+            contentDescription = stringResource(
+                if (isClientActive) R.string.action_stop_client else R.string.action_start_client,
+            ),
         )
     }
 }
@@ -76,7 +80,9 @@ fun ClientScreen(
 ) {
     val sessionState = state.sessionState
     val isClientActive = isClientActive(sessionState)
-    val errorMessage = state.actionError ?: failureMessage(sessionState) ?: "-"
+    val errorMessage = state.actionErrorRes?.let { stringResource(it) }
+        ?: failureMessage(sessionState)
+        ?: "-"
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -89,7 +95,7 @@ fun ClientScreen(
                 onValueChange = onServerAddressChange,
                 modifier = Modifier.fillMaxWidth(),
                 enabled = !isClientActive,
-                label = { Text("Server Address") },
+                label = { Text(stringResource(R.string.field_server_address)) },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri),
             )
@@ -101,7 +107,7 @@ fun ClientScreen(
                 onValueChange = onServerPortChange,
                 modifier = Modifier.fillMaxWidth(),
                 enabled = !isClientActive,
-                label = { Text("Server Port") },
+                label = { Text(stringResource(R.string.field_server_port)) },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             )
@@ -113,7 +119,7 @@ fun ClientScreen(
                 onValueChange = onParallelStreamsChange,
                 modifier = Modifier.fillMaxWidth(),
                 enabled = !isClientActive,
-                label = { Text("Parallel Streams") },
+                label = { Text(stringResource(R.string.field_parallel_streams)) },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             )
@@ -121,20 +127,20 @@ fun ClientScreen(
 
         item {
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text("Status")
-                Text(statusText(sessionState))
-                Text("Error")
+                Text(stringResource(R.string.section_status))
+                Text(stringResource(statusText(sessionState)))
+                Text(stringResource(R.string.section_error))
                 Text(errorMessage)
             }
         }
 
         item {
-            Text("Live Data")
+            Text(stringResource(R.string.section_live_data))
         }
 
         if (state.jsonEvents.isEmpty()) {
             item {
-                Text("No JSON events yet.")
+                Text(stringResource(R.string.message_no_json_events))
             }
         } else {
             items(
@@ -146,7 +152,9 @@ fun ClientScreen(
                         modifier = Modifier.clickable {
                             onToggleJsonEvent(event.id)
                         },
-                        headlineContent = { Text(event.name ?: "event") },
+                        headlineContent = {
+                            Text(event.name ?: stringResource(R.string.event_fallback))
+                        },
                         supportingContent = {
                             if (event.id in state.expandedJsonEventIds) {
                                 SelectionContainer {
@@ -174,21 +182,24 @@ private fun isClientActive(state: IperfSessionState): Boolean {
     }
 }
 
-private fun statusText(state: IperfSessionState): String {
+private fun statusText(state: IperfSessionState): Int {
     return when {
-        state is IperfSessionState.Starting && state.kind == IperfSessionKind.CLIENT -> "Starting"
-        state is IperfSessionState.Running && state.kind == IperfSessionKind.CLIENT -> "Running"
-        state is IperfSessionState.Stopping && state.kind == IperfSessionKind.CLIENT -> "Stopping"
-        state is IperfSessionState.Stopped && state.kind == IperfSessionKind.CLIENT -> "Stopped"
-        state is IperfSessionState.Finished && state.kind == IperfSessionKind.CLIENT -> "Finished"
-        state is IperfSessionState.Failed && state.kind == IperfSessionKind.CLIENT -> "Failed"
-        else -> "Idle"
+        state is IperfSessionState.Starting && state.kind == IperfSessionKind.CLIENT -> R.string.status_starting
+        state is IperfSessionState.Running && state.kind == IperfSessionKind.CLIENT -> R.string.status_running
+        state is IperfSessionState.Stopping && state.kind == IperfSessionKind.CLIENT -> R.string.status_stopping
+        state is IperfSessionState.Stopped && state.kind == IperfSessionKind.CLIENT -> R.string.status_stopped
+        state is IperfSessionState.Finished && state.kind == IperfSessionKind.CLIENT -> R.string.status_finished
+        state is IperfSessionState.Failed && state.kind == IperfSessionKind.CLIENT -> R.string.status_failed
+        else -> R.string.status_idle
     }
 }
 
+@Composable
 private fun failureMessage(state: IperfSessionState): String? {
-    return (state as? IperfSessionState.Failed)
+    val failure = (state as? IperfSessionState.Failed)
         ?.takeIf { it.kind == IperfSessionKind.CLIENT }
         ?.failure
-        ?.message
+        ?: return null
+
+    return failure.nativeMessage ?: stringResource(failure.fallbackMessageRes)
 }

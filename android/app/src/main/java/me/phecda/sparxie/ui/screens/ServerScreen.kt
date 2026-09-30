@@ -22,11 +22,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import me.phecda.sparxie.R
 import me.phecda.sparxie.runtime.IperfSessionKind
 import me.phecda.sparxie.runtime.IperfSessionState
 
@@ -59,7 +61,9 @@ fun ServerToolbarAction(viewModel: ServerViewModel) {
     ) {
         Icon(
             imageVector = if (isServerActive) Icons.Default.Stop else Icons.Default.PlayArrow,
-            contentDescription = if (isServerActive) "Stop Server" else "Start Server",
+            contentDescription = stringResource(
+                if (isServerActive) R.string.action_stop_server else R.string.action_start_server,
+            ),
         )
     }
 }
@@ -72,7 +76,9 @@ fun ServerScreen(
 ) {
     val sessionState = state.sessionState
     val isServerActive = isServerActive(sessionState)
-    val errorMessage = state.actionError ?: failureMessage(sessionState) ?: "-"
+    val errorMessage = state.actionErrorRes?.let { stringResource(it) }
+        ?: failureMessage(sessionState)
+        ?: "-"
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -85,7 +91,7 @@ fun ServerScreen(
                 onValueChange = onServerPortChange,
                 modifier = Modifier.fillMaxWidth(),
                 enabled = !isServerActive,
-                label = { Text("Server Port") },
+                label = { Text(stringResource(R.string.field_server_port)) },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             )
@@ -93,20 +99,20 @@ fun ServerScreen(
 
         item {
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text("Status")
-                Text(statusText(sessionState))
-                Text("Error")
+                Text(stringResource(R.string.section_status))
+                Text(stringResource(statusText(sessionState)))
+                Text(stringResource(R.string.section_error))
                 Text(errorMessage)
             }
         }
 
         item {
-            Text("Live Data")
+            Text(stringResource(R.string.section_live_data))
         }
 
         if (state.jsonEvents.isEmpty()) {
             item {
-                Text("No JSON events yet.")
+                Text(stringResource(R.string.message_no_json_events))
             }
         } else {
             items(
@@ -118,7 +124,9 @@ fun ServerScreen(
                         modifier = Modifier.clickable {
                             onToggleJsonEvent(event.id)
                         },
-                        headlineContent = { Text(event.name ?: "event") },
+                        headlineContent = {
+                            Text(event.name ?: stringResource(R.string.event_fallback))
+                        },
                         supportingContent = {
                             if (event.id in state.expandedJsonEventIds) {
                                 SelectionContainer {
@@ -146,21 +154,24 @@ private fun isServerActive(state: IperfSessionState): Boolean {
     }
 }
 
-private fun statusText(state: IperfSessionState): String {
+private fun statusText(state: IperfSessionState): Int {
     return when {
-        state is IperfSessionState.Starting && state.kind == IperfSessionKind.SERVER -> "Starting"
-        state is IperfSessionState.Running && state.kind == IperfSessionKind.SERVER -> "Listening"
-        state is IperfSessionState.Stopping && state.kind == IperfSessionKind.SERVER -> "Stopping"
-        state is IperfSessionState.Stopped && state.kind == IperfSessionKind.SERVER -> "Stopped"
-        state is IperfSessionState.Finished && state.kind == IperfSessionKind.SERVER -> "Finished"
-        state is IperfSessionState.Failed && state.kind == IperfSessionKind.SERVER -> "Failed"
-        else -> "Idle"
+        state is IperfSessionState.Starting && state.kind == IperfSessionKind.SERVER -> R.string.status_starting
+        state is IperfSessionState.Running && state.kind == IperfSessionKind.SERVER -> R.string.status_listening
+        state is IperfSessionState.Stopping && state.kind == IperfSessionKind.SERVER -> R.string.status_stopping
+        state is IperfSessionState.Stopped && state.kind == IperfSessionKind.SERVER -> R.string.status_stopped
+        state is IperfSessionState.Finished && state.kind == IperfSessionKind.SERVER -> R.string.status_finished
+        state is IperfSessionState.Failed && state.kind == IperfSessionKind.SERVER -> R.string.status_failed
+        else -> R.string.status_idle
     }
 }
 
+@Composable
 private fun failureMessage(state: IperfSessionState): String? {
-    return (state as? IperfSessionState.Failed)
+    val failure = (state as? IperfSessionState.Failed)
         ?.takeIf { it.kind == IperfSessionKind.SERVER }
         ?.failure
-        ?.message
+        ?: return null
+
+    return failure.nativeMessage ?: stringResource(failure.fallbackMessageRes)
 }

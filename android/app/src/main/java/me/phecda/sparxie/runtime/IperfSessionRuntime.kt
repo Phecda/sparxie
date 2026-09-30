@@ -1,7 +1,9 @@
 package me.phecda.sparxie.runtime
 
+import androidx.annotation.StringRes
 import me.phecda.iperf3.Iperf3Native
 import me.phecda.iperf3.IperfJsonListener
+import me.phecda.sparxie.R
 
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -30,7 +32,8 @@ data class IperfServerConfiguration(
 
 data class IperfSessionFailure(
     val code: Int,
-    val message: String,
+    val nativeMessage: String?,
+    @param:StringRes val fallbackMessageRes: Int,
 )
 
 data class IperfJsonEvent(
@@ -171,7 +174,10 @@ object IperfSessionRuntime {
                 kind = kind,
                 terminalState = IperfSessionState.Failed(
                     kind = kind,
-                    failure = failureFromThrowable(throwable),
+                    failure = failureFromThrowable(
+                        throwable = throwable,
+                        fallbackMessageRes = R.string.error_unable_prepare_iperf_session,
+                    ),
                 ),
             )
             return
@@ -182,7 +188,7 @@ object IperfSessionRuntime {
                 kind = kind,
                 terminalState = IperfSessionState.Failed(
                     kind = kind,
-                    failure = nativeFailure("Unable to prepare the iperf session."),
+                    failure = nativeFailure(R.string.error_unable_prepare_iperf_session),
                 ),
             )
             return
@@ -201,7 +207,10 @@ object IperfSessionRuntime {
                 kind = kind,
                 terminalState = IperfSessionState.Failed(
                     kind = kind,
-                    failure = failureFromThrowable(throwable),
+                    failure = failureFromThrowable(
+                        throwable = throwable,
+                        fallbackMessageRes = R.string.error_iperf_session_failed,
+                    ),
                 ),
             )
             return
@@ -228,7 +237,7 @@ object IperfSessionRuntime {
                     kind = kind,
                     terminalState = IperfSessionState.Failed(
                         kind = kind,
-                        failure = nativeFailure("The iperf session failed."),
+                        failure = nativeFailure(R.string.error_iperf_session_failed),
                     ),
                 )
             }
@@ -256,21 +265,29 @@ object IperfSessionRuntime {
         }
     }
 
-    private fun nativeFailure(fallbackMessage: String): IperfSessionFailure {
+    private fun nativeFailure(
+        @StringRes fallbackMessageRes: Int,
+    ): IperfSessionFailure {
         val code = runCatching { Iperf3Native.lastErrorCode() }.getOrDefault(-1)
         val message = runCatching { Iperf3Native.lastErrorMessage(code) }
             .getOrNull()
             ?.takeIf { it.isNotBlank() }
-            ?: fallbackMessage
 
-        return IperfSessionFailure(code = code, message = message)
+        return IperfSessionFailure(
+            code = code,
+            nativeMessage = message,
+            fallbackMessageRes = fallbackMessageRes,
+        )
     }
 
-    private fun failureFromThrowable(throwable: Throwable): IperfSessionFailure {
+    private fun failureFromThrowable(
+        throwable: Throwable,
+        @StringRes fallbackMessageRes: Int,
+    ): IperfSessionFailure {
         return IperfSessionFailure(
             code = -1,
-            message = throwable.message?.takeIf { it.isNotBlank() }
-                ?: throwable.javaClass.simpleName,
+            nativeMessage = throwable.message?.takeIf { it.isNotBlank() },
+            fallbackMessageRes = fallbackMessageRes,
         )
     }
 

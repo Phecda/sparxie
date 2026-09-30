@@ -12,6 +12,8 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import me.phecda.sparxie.R
 
 @Composable
 fun MoreScreen(
@@ -25,16 +27,16 @@ fun MoreScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable(onClick = onSettingsClick),
-            headlineContent = { Text("Settings") },
-            supportingContent = { Text("App preferences") },
+            headlineContent = { Text(stringResource(R.string.title_settings)) },
+            supportingContent = { Text(stringResource(R.string.more_settings_summary)) },
             leadingContent = { Icon(Icons.Default.Settings, contentDescription = null) },
         )
         ListItem(
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable(onClick = onLicensesClick),
-            headlineContent = { Text("Open Source Licenses") },
-            supportingContent = { Text("Dependency licenses") },
+            headlineContent = { Text(stringResource(R.string.title_open_source_licenses)) },
+            supportingContent = { Text(stringResource(R.string.more_licenses_summary)) },
             leadingContent = { Icon(Icons.Default.Description, contentDescription = null) },
         )
     }

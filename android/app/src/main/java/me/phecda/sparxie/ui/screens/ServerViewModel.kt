@@ -1,5 +1,6 @@
 package me.phecda.sparxie.ui.screens
 
+import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -8,9 +9,11 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import me.phecda.sparxie.R
 import me.phecda.sparxie.runtime.IperfJsonEvent
 import me.phecda.sparxie.runtime.IperfServerConfiguration
 import me.phecda.sparxie.runtime.IperfSessionRuntime
+import me.phecda.sparxie.runtime.IperfSessionRuntimeException
 import me.phecda.sparxie.runtime.IperfSessionState
 
 data class ServerUiState(
@@ -18,7 +21,7 @@ data class ServerUiState(
     val sessionState: IperfSessionState = IperfSessionState.Idle,
     val jsonEvents: List<IperfJsonEvent> = emptyList(),
     val expandedJsonEventIds: Set<Long> = emptySet(),
-    val actionError: String? = null,
+    @param:StringRes val actionErrorRes: Int? = null,
 )
 
 class ServerViewModel : ViewModel() {
@@ -35,7 +38,7 @@ class ServerViewModel : ViewModel() {
             sessionState = sessionState,
             jsonEvents = jsonEvents.asReversed().toList(),
             expandedJsonEventIds = localState.expandedJsonEventIds,
-            actionError = localState.actionError,
+            actionErrorRes = localState.actionErrorRes,
         )
     }.stateIn(
         scope = viewModelScope,
@@ -51,17 +54,17 @@ class ServerViewModel : ViewModel() {
         val port = localState.value.portInput.trim().toIntOrNull()
         if (port == null || port !in 1..65_535) {
             localState.update {
-                it.copy(actionError = "Server Port must be between 1 and 65535.")
+                it.copy(actionErrorRes = R.string.error_server_port_range)
             }
             return
         }
 
-        localState.update { it.copy(actionError = null) }
+        localState.update { it.copy(actionErrorRes = null) }
         runCatching {
             runtime.startServer(IperfServerConfiguration(serverPort = port))
         }.onFailure { throwable ->
             localState.update {
-                it.copy(actionError = throwable.message ?: "Unable to start the server.")
+                it.copy(actionErrorRes = serverActionError(throwable))
             }
         }
     }
@@ -69,13 +72,13 @@ class ServerViewModel : ViewModel() {
     fun onLocalNetworkPermissionDenied() {
         localState.update {
             it.copy(
-                actionError = "Local network permission is required. Allow Nearby devices in app settings.",
+                actionErrorRes = R.string.error_local_network_permission_required,
             )
         }
     }
 
     fun onStop() {
-        localState.update { it.copy(actionError = null) }
+        localState.update { it.copy(actionErrorRes = null) }
         runtime.stop()
     }
 
@@ -95,6 +98,15 @@ class ServerViewModel : ViewModel() {
     private data class LocalState(
         val portInput: String = "5201",
         val expandedJsonEventIds: Set<Long> = emptySet(),
-        val actionError: String? = null,
+        @param:StringRes val actionErrorRes: Int? = null,
     )
+
+    @StringRes
+    private fun serverActionError(throwable: Throwable): Int {
+        return when (throwable) {
+            IperfSessionRuntimeException.AlreadyRunning -> R.string.error_iperf_session_already_running
+            IperfSessionRuntimeException.InvalidServerPort -> R.string.error_server_port_range
+            else -> R.string.error_unable_start_server
+        }
+    }
 }
