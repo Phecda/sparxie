@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		000000000000000000000150 /* Iperf3.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 000000000000000000000121 /* Iperf3.xcframework */; };
+		000000000000000000000151 /* MMKV in Frameworks */ = {isa = PBXBuildFile; productRef = 000000000000000000000152 /* MMKV */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -28,6 +29,7 @@
 			isa = PBXFrameworksBuildPhase;
 			files = (
 				000000000000000000000150 /* Iperf3.xcframework in Frameworks */,
+				000000000000000000000151 /* MMKV in Frameworks */,
 			);
 		};
 /* End PBXFrameworksBuildPhase section */
@@ -67,6 +69,9 @@
 				000000000000000000000010 /* Sparxie */,
 			);
 			name = Sparxie;
+			packageProductDependencies = (
+				000000000000000000000152 /* MMKV */,
+			);
 			productName = Sparxie;
 			productReference = 000000000000000000000120 /* Sparxie.app */;
 			productType = "com.apple.product-type.application";
@@ -96,6 +101,9 @@
 			);
 			mainGroup = 000000000000000000000001;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				000000000000000000000153 /* XCRemoteSwiftPackageReference "MMKV" */,
+			);
 			preferredProjectObjectVersion = 90;
 			productRefGroup = 000000000000000000000020 /* Products */;
 			projectDirPath = "";
@@ -357,6 +365,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		000000000000000000000153 /* XCRemoteSwiftPackageReference "MMKV" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Tencent/MMKV.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.4.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		000000000000000000000152 /* MMKV */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 000000000000000000000153 /* XCRemoteSwiftPackageReference "MMKV" */;
+			productName = MMKV;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 000000000000000000000000 /* Project object */;
 }

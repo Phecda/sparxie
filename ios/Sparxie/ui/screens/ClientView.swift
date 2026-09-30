@@ -1,28 +1,38 @@
 import SwiftUI
 
 struct ClientView: View {
+    @Environment(AppSettingsStore.self) private var settings
     @Environment(IperfSessionRuntime.self) private var runtime
-    @State private var serverAddress = ""
-    @State private var serverPort = "5201"
-    @State private var parallelStreams = "1"
+    @FocusState private var focusedField: Field?
     @State private var actionError: String?
 
+    private enum Field: Hashable {
+        case address
+        case port
+        case parallelStreams
+    }
+
     var body: some View {
+        @Bindable var settings = settings
+
         List {
             Section("Client") {
-                TextField("Server Address", text: $serverAddress)
+                TextField("Server Address", text: $settings.clientServerAddress)
+                    .focused($focusedField, equals: .address)
                     .disabled(isClientActive)
 
-                TextField("Server Port", text: $serverPort)
+                TextField("Server Port", text: $settings.clientServerPort)
                 #if os(iOS)
                     .keyboardType(.numberPad)
                 #endif
+                    .focused($focusedField, equals: .port)
                     .disabled(isClientActive)
 
-                TextField("Parallel Streams", text: $parallelStreams)
+                TextField("Parallel Streams", text: $settings.clientParallelStreams)
                 #if os(iOS)
                     .keyboardType(.numberPad)
                 #endif
+                    .focused($focusedField, equals: .parallelStreams)
                     .disabled(isClientActive)
             }
 
@@ -53,6 +63,12 @@ struct ClientView: View {
             ToolbarItem(placement: .primaryAction) {
                 clientActionButton
             }
+        }
+        .onChange(of: focusedField) { _, _ in
+            settings.persistClient()
+        }
+        .onDisappear {
+            settings.persistClient()
         }
     }
 
@@ -128,15 +144,16 @@ struct ClientView: View {
     }
 
     private func startClient() {
+        settings.persistClient()
         actionError = nil
 
-        let address = serverAddress.trimmingCharacters(in: .whitespacesAndNewlines)
+        let address = settings.clientServerAddress.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !address.isEmpty else {
             actionError = IperfSessionRuntimeError.invalidServerAddress.localizedDescription
             return
         }
 
-        let portText = serverPort.trimmingCharacters(in: .whitespacesAndNewlines)
+        let portText = settings.clientServerPort.trimmingCharacters(in: .whitespacesAndNewlines)
         guard let port = Int(portText), (1...65_535).contains(port) else {
             actionError = String(
                 localized: "Server Port must be a whole number between 1 and 65535."
@@ -144,7 +161,7 @@ struct ClientView: View {
             return
         }
 
-        let streamsText = parallelStreams.trimmingCharacters(in: .whitespacesAndNewlines)
+        let streamsText = settings.clientParallelStreams.trimmingCharacters(in: .whitespacesAndNewlines)
         guard let streams = Int(streamsText), (1...128).contains(streams) else {
             actionError = String(
                 localized: "Parallel Streams must be a whole number between 1 and 128."
@@ -176,4 +193,5 @@ struct ClientView: View {
         ClientView()
     }
     .environment(IperfSessionRuntime.shared)
+    .environment(AppSettingsStore.preview())
 }

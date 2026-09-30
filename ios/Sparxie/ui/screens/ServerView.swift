@@ -1,17 +1,21 @@
 import SwiftUI
 
 struct ServerView: View {
+    @Environment(AppSettingsStore.self) private var settings
     @Environment(IperfSessionRuntime.self) private var runtime
-    @State private var serverPort = "5201"
+    @FocusState private var isPortFocused: Bool
     @State private var actionError: String?
 
     var body: some View {
+        @Bindable var settings = settings
+
         List {
             Section("Server") {
-                TextField("Server Port", text: $serverPort)
+                TextField("Server Port", text: $settings.serverPort)
                 #if os(iOS)
                     .keyboardType(.numberPad)
                 #endif
+                    .focused($isPortFocused)
                     .disabled(isServerActive)
             }
 
@@ -42,6 +46,12 @@ struct ServerView: View {
             ToolbarItem(placement: .primaryAction) {
                 serverActionButton
             }
+        }
+        .onChange(of: isPortFocused) { _, _ in
+            settings.persistServer()
+        }
+        .onDisappear {
+            settings.persistServer()
         }
     }
 
@@ -117,9 +127,10 @@ struct ServerView: View {
     }
 
     private func startServer() {
+        settings.persistServer()
         actionError = nil
 
-        let portText = serverPort.trimmingCharacters(in: .whitespacesAndNewlines)
+        let portText = settings.serverPort.trimmingCharacters(in: .whitespacesAndNewlines)
         guard let port = Int(portText), (1...65_535).contains(port) else {
             actionError = String(
                 localized: "Server Port must be a whole number between 1 and 65535."
@@ -145,4 +156,5 @@ struct ServerView: View {
         ServerView()
     }
     .environment(IperfSessionRuntime.shared)
+    .environment(AppSettingsStore.preview())
 }
