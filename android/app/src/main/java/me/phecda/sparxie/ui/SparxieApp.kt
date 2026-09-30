@@ -116,7 +116,11 @@ fun SparxieApp() {
         entry<Licenses>(metadata = metadata {
             put(TopLevelRouteMetadataKey, MoreHome as NavKey)
         }) {
-            LicensesScreen()
+            LicensesScreen(
+                onLicenseClick = { licenseId ->
+                    navigator.navigate(LicenseDetail(licenseId))
+                },
+            )
         }
         entry<LicenseDetail>(metadata = metadata {
             put(TopLevelRouteMetadataKey, MoreHome as NavKey)
