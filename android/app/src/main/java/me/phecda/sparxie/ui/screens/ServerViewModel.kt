@@ -1,7 +1,8 @@
 package me.phecda.sparxie.ui.screens
 
 import androidx.annotation.StringRes
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -10,6 +11,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import me.phecda.sparxie.R
+import me.phecda.sparxie.SparxieApplication
 import me.phecda.sparxie.runtime.IperfJsonEvent
 import me.phecda.sparxie.runtime.IperfServerConfiguration
 import me.phecda.sparxie.runtime.IperfSessionRuntime
@@ -24,7 +26,8 @@ data class ServerUiState(
     @param:StringRes val actionErrorRes: Int? = null,
 )
 
-class ServerViewModel : ViewModel() {
+class ServerViewModel(application: Application) : AndroidViewModel(application) {
+    private val settingsStore = (application as SparxieApplication).serverSettingsStore
     private val runtime = IperfSessionRuntime
     private val localState = MutableStateFlow(LocalState())
 
@@ -32,9 +35,10 @@ class ServerViewModel : ViewModel() {
         runtime.state,
         runtime.jsonEvents,
         localState,
-    ) { sessionState, jsonEvents, localState ->
+        settingsStore.state,
+    ) { sessionState, jsonEvents, localState, settings ->
         ServerUiState(
-            portInput = localState.portInput,
+            portInput = settings.portInput,
             sessionState = sessionState,
             jsonEvents = jsonEvents.asReversed().toList(),
             expandedJsonEventIds = localState.expandedJsonEventIds,
@@ -43,15 +47,15 @@ class ServerViewModel : ViewModel() {
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
-        initialValue = ServerUiState(),
+        initialValue = ServerUiState(portInput = settingsStore.state.value.portInput),
     )
 
     fun onServerPortChange(value: String) {
-        localState.update { it.copy(portInput = value) }
+        settingsStore.setPort(value)
     }
 
     fun onStart() {
-        val port = localState.value.portInput.trim().toIntOrNull()
+        val port = settingsStore.state.value.portInput.trim().toIntOrNull()
         if (port == null || port !in 1..65_535) {
             localState.update {
                 it.copy(actionErrorRes = R.string.error_server_port_range)
