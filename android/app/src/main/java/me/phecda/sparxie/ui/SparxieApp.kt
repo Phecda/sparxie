@@ -30,7 +30,7 @@ import me.phecda.sparxie.ui.navigation.ServerHome
 import me.phecda.sparxie.ui.navigation.Settings
 import me.phecda.sparxie.ui.navigation.TopLevelRouteMetadataKey
 import me.phecda.sparxie.ui.navigation.rememberNavigationState
-import me.phecda.sparxie.ui.screens.ClientScreen
+import me.phecda.sparxie.ui.screens.ClientRoute
 import me.phecda.sparxie.ui.screens.LicenseDetailScreen
 import me.phecda.sparxie.ui.screens.LicensesScreen
 import me.phecda.sparxie.ui.screens.MoreScreen
@@ -78,7 +78,7 @@ fun SparxieApp() {
         entry<ClientHome>(metadata = metadata {
             put(TopLevelRouteMetadataKey, ClientHome as NavKey)
         }) {
-            ClientScreen()
+            ClientRoute()
         }
         entry<ServerHome>(metadata = metadata {
             put(TopLevelRouteMetadataKey, ServerHome as NavKey)

@@ -35,11 +35,15 @@ import me.phecda.sparxie.runtime.IperfSessionState
 @Composable
 fun ServerRoute(viewModel: ServerViewModel = viewModel()) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val onStart = rememberLocalNetworkStart(
+        onStart = viewModel::onStart,
+        onPermissionDenied = viewModel::onLocalNetworkPermissionDenied,
+    )
 
     ServerScreen(
         state = uiState,
         onServerPortChange = viewModel::onServerPortChange,
-        onStart = viewModel::onStart,
+        onStart = onStart,
         onStop = viewModel::onStop,
         onToggleJsonEvent = viewModel::onToggleJsonEvent,
     )

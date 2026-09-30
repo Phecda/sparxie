@@ -9,29 +9,33 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import me.phecda.sparxie.runtime.IperfJsonEvent
-import me.phecda.sparxie.runtime.IperfServerConfiguration
+import me.phecda.sparxie.runtime.IperfClientConfiguration
 import me.phecda.sparxie.runtime.IperfSessionRuntime
 import me.phecda.sparxie.runtime.IperfSessionState
 
-data class ServerUiState(
+data class ClientUiState(
+    val addressInput: String = "",
     val portInput: String = "5201",
+    val parallelStreamsInput: String = "1",
     val sessionState: IperfSessionState = IperfSessionState.Idle,
     val jsonEvents: List<IperfJsonEvent> = emptyList(),
     val expandedJsonEventIds: Set<Long> = emptySet(),
     val actionError: String? = null,
 )
 
-class ServerViewModel : ViewModel() {
+class ClientViewModel : ViewModel() {
     private val runtime = IperfSessionRuntime
     private val localState = MutableStateFlow(LocalState())
 
-    val uiState: StateFlow<ServerUiState> = combine(
+    val uiState: StateFlow<ClientUiState> = combine(
         runtime.state,
         runtime.jsonEvents,
         localState,
     ) { sessionState, jsonEvents, localState ->
-        ServerUiState(
+        ClientUiState(
+            addressInput = localState.addressInput,
             portInput = localState.portInput,
+            parallelStreamsInput = localState.parallelStreamsInput,
             sessionState = sessionState,
             jsonEvents = jsonEvents.asReversed().toList(),
             expandedJsonEventIds = localState.expandedJsonEventIds,
@@ -40,14 +44,30 @@ class ServerViewModel : ViewModel() {
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
-        initialValue = ServerUiState(),
+        initialValue = ClientUiState(),
     )
+
+    fun onServerAddressChange(value: String) {
+        localState.update { it.copy(addressInput = value) }
+    }
 
     fun onServerPortChange(value: String) {
         localState.update { it.copy(portInput = value) }
     }
 
+    fun onParallelStreamsChange(value: String) {
+        localState.update { it.copy(parallelStreamsInput = value) }
+    }
+
     fun onStart() {
+        val address = localState.value.addressInput.trim()
+        if (address.isEmpty()) {
+            localState.update {
+                it.copy(actionError = "Server Address must not be empty.")
+            }
+            return
+        }
+
         val port = localState.value.portInput.trim().toIntOrNull()
         if (port == null || port !in 1..65_535) {
             localState.update {
@@ -56,12 +76,26 @@ class ServerViewModel : ViewModel() {
             return
         }
 
+        val parallelStreams = localState.value.parallelStreamsInput.trim().toIntOrNull()
+        if (parallelStreams == null || parallelStreams !in 1..128) {
+            localState.update {
+                it.copy(actionError = "Parallel Streams must be between 1 and 128.")
+            }
+            return
+        }
+
         localState.update { it.copy(actionError = null) }
         runCatching {
-            runtime.startServer(IperfServerConfiguration(serverPort = port))
+            runtime.startClient(
+                IperfClientConfiguration(
+                    serverAddress = address,
+                    serverPort = port,
+                    parallelStreams = parallelStreams,
+                ),
+            )
         }.onFailure { throwable ->
             localState.update {
-                it.copy(actionError = throwable.message ?: "Unable to start the server.")
+                it.copy(actionError = throwable.message ?: "Unable to start the client.")
             }
         }
     }
@@ -93,7 +127,9 @@ class ServerViewModel : ViewModel() {
     }
 
     private data class LocalState(
+        val addressInput: String = "",
         val portInput: String = "5201",
+        val parallelStreamsInput: String = "1",
         val expandedJsonEventIds: Set<Long> = emptySet(),
         val actionError: String? = null,
     )
