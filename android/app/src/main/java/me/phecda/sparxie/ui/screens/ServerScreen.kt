@@ -4,10 +4,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
@@ -15,9 +13,9 @@ import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Stop
-import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -35,32 +33,45 @@ import me.phecda.sparxie.runtime.IperfSessionState
 @Composable
 fun ServerRoute(viewModel: ServerViewModel = viewModel()) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    ServerScreen(
+        state = uiState,
+        onServerPortChange = viewModel::onServerPortChange,
+        onToggleJsonEvent = viewModel::onToggleJsonEvent,
+    )
+}
+
+@Composable
+fun ServerToolbarAction(viewModel: ServerViewModel) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val sessionState = uiState.sessionState
+    val isServerActive = isServerActive(sessionState)
+    val isStopping = sessionState is IperfSessionState.Stopping &&
+        sessionState.kind == IperfSessionKind.SERVER
     val onStart = rememberLocalNetworkStart(
         onStart = viewModel::onStart,
         onPermissionDenied = viewModel::onLocalNetworkPermissionDenied,
     )
 
-    ServerScreen(
-        state = uiState,
-        onServerPortChange = viewModel::onServerPortChange,
-        onStart = onStart,
-        onStop = viewModel::onStop,
-        onToggleJsonEvent = viewModel::onToggleJsonEvent,
-    )
+    FilledIconButton(
+        onClick = if (isServerActive) viewModel::onStop else onStart,
+        enabled = !isStopping,
+    ) {
+        Icon(
+            imageVector = if (isServerActive) Icons.Default.Stop else Icons.Default.PlayArrow,
+            contentDescription = if (isServerActive) "Stop Server" else "Start Server",
+        )
+    }
 }
 
 @Composable
 fun ServerScreen(
     state: ServerUiState,
     onServerPortChange: (String) -> Unit,
-    onStart: () -> Unit,
-    onStop: () -> Unit,
     onToggleJsonEvent: (Long) -> Unit,
 ) {
     val sessionState = state.sessionState
     val isServerActive = isServerActive(sessionState)
-    val isStopping = sessionState is IperfSessionState.Stopping &&
-        sessionState.kind == IperfSessionKind.SERVER
     val errorMessage = state.actionError ?: failureMessage(sessionState) ?: "-"
 
     LazyColumn(
@@ -78,21 +89,6 @@ fun ServerScreen(
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             )
-        }
-
-        item {
-            Button(
-                onClick = if (isServerActive) onStop else onStart,
-                modifier = Modifier.fillMaxWidth(),
-                enabled = !isStopping,
-            ) {
-                Icon(
-                    imageVector = if (isServerActive) Icons.Default.Stop else Icons.Default.PlayArrow,
-                    contentDescription = null,
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(if (isServerActive) "Stop Server" else "Start Server")
-            }
         }
 
         item {

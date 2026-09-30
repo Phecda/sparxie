@@ -4,10 +4,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
@@ -15,9 +13,9 @@ import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Stop
-import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -35,20 +33,37 @@ import me.phecda.sparxie.runtime.IperfSessionState
 @Composable
 fun ClientRoute(viewModel: ClientViewModel = viewModel()) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val onStart = rememberLocalNetworkStart(
-        onStart = viewModel::onStart,
-        onPermissionDenied = viewModel::onLocalNetworkPermissionDenied,
-    )
 
     ClientScreen(
         state = uiState,
         onServerAddressChange = viewModel::onServerAddressChange,
         onServerPortChange = viewModel::onServerPortChange,
         onParallelStreamsChange = viewModel::onParallelStreamsChange,
-        onStart = onStart,
-        onStop = viewModel::onStop,
         onToggleJsonEvent = viewModel::onToggleJsonEvent,
     )
+}
+
+@Composable
+fun ClientToolbarAction(viewModel: ClientViewModel) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val sessionState = uiState.sessionState
+    val isClientActive = isClientActive(sessionState)
+    val isStopping = sessionState is IperfSessionState.Stopping &&
+        sessionState.kind == IperfSessionKind.CLIENT
+    val onStart = rememberLocalNetworkStart(
+        onStart = viewModel::onStart,
+        onPermissionDenied = viewModel::onLocalNetworkPermissionDenied,
+    )
+
+    FilledIconButton(
+        onClick = if (isClientActive) viewModel::onStop else onStart,
+        enabled = !isStopping,
+    ) {
+        Icon(
+            imageVector = if (isClientActive) Icons.Default.Stop else Icons.Default.PlayArrow,
+            contentDescription = if (isClientActive) "Stop Client" else "Start Client",
+        )
+    }
 }
 
 @Composable
@@ -57,14 +72,10 @@ fun ClientScreen(
     onServerAddressChange: (String) -> Unit,
     onServerPortChange: (String) -> Unit,
     onParallelStreamsChange: (String) -> Unit,
-    onStart: () -> Unit,
-    onStop: () -> Unit,
     onToggleJsonEvent: (Long) -> Unit,
 ) {
     val sessionState = state.sessionState
     val isClientActive = isClientActive(sessionState)
-    val isStopping = sessionState is IperfSessionState.Stopping &&
-        sessionState.kind == IperfSessionKind.CLIENT
     val errorMessage = state.actionError ?: failureMessage(sessionState) ?: "-"
 
     LazyColumn(
@@ -106,21 +117,6 @@ fun ClientScreen(
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             )
-        }
-
-        item {
-            Button(
-                onClick = if (isClientActive) onStop else onStart,
-                modifier = Modifier.fillMaxWidth(),
-                enabled = !isStopping,
-            ) {
-                Icon(
-                    imageVector = if (isClientActive) Icons.Default.Stop else Icons.Default.PlayArrow,
-                    contentDescription = null,
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(if (isClientActive) "Stop Client" else "Start Client")
-            }
         }
 
         item {

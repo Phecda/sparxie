@@ -16,6 +16,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.metadata
@@ -31,11 +32,15 @@ import me.phecda.sparxie.ui.navigation.Settings
 import me.phecda.sparxie.ui.navigation.TopLevelRouteMetadataKey
 import me.phecda.sparxie.ui.navigation.rememberNavigationState
 import me.phecda.sparxie.ui.screens.ClientRoute
+import me.phecda.sparxie.ui.screens.ClientToolbarAction
+import me.phecda.sparxie.ui.screens.ClientViewModel
 import me.phecda.sparxie.ui.screens.LicenseDetailScreen
 import me.phecda.sparxie.ui.screens.LicensesScreen
 import me.phecda.sparxie.ui.screens.MoreScreen
 import me.phecda.sparxie.ui.screens.ServerBindAddressScreen
 import me.phecda.sparxie.ui.screens.ServerRoute
+import me.phecda.sparxie.ui.screens.ServerToolbarAction
+import me.phecda.sparxie.ui.screens.ServerViewModel
 import me.phecda.sparxie.ui.screens.SettingsScreen
 
 private data class TopLevelDestination(
@@ -56,6 +61,8 @@ private val topLevelRoutes: Set<NavKey> = topLevelDestinations
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SparxieApp() {
+    val clientViewModel: ClientViewModel = viewModel()
+    val serverViewModel: ServerViewModel = viewModel()
     val navigationState = rememberNavigationState(
         startRoute = ClientHome,
         topLevelRoutes = topLevelRoutes,
@@ -78,12 +85,12 @@ fun SparxieApp() {
         entry<ClientHome>(metadata = metadata {
             put(TopLevelRouteMetadataKey, ClientHome as NavKey)
         }) {
-            ClientRoute()
+            ClientRoute(viewModel = clientViewModel)
         }
         entry<ServerHome>(metadata = metadata {
             put(TopLevelRouteMetadataKey, ServerHome as NavKey)
         }) {
-            ServerRoute()
+            ServerRoute(viewModel = serverViewModel)
         }
         entry<ServerBindAddress>(metadata = metadata {
             put(TopLevelRouteMetadataKey, ServerHome as NavKey)
@@ -119,6 +126,12 @@ fun SparxieApp() {
         topBar = {
             TopAppBar(
                 title = { Text(title) },
+                actions = {
+                    when (currentRoute) {
+                        ClientHome -> ClientToolbarAction(viewModel = clientViewModel)
+                        ServerHome -> ServerToolbarAction(viewModel = serverViewModel)
+                    }
+                },
                 navigationIcon = {
                     if (isChildPage) {
                         IconButton(onClick = navigator::goBack) {
