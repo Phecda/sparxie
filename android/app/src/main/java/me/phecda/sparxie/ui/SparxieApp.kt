@@ -25,7 +25,6 @@ import androidx.navigation3.runtime.metadata
 import me.phecda.sparxie.R
 import me.phecda.sparxie.ui.navigation.ClientHome
 import me.phecda.sparxie.ui.navigation.AppNavDisplay
-import me.phecda.sparxie.ui.navigation.LicenseDetail
 import me.phecda.sparxie.ui.navigation.Licenses
 import me.phecda.sparxie.ui.navigation.MoreHome
 import me.phecda.sparxie.ui.navigation.Navigator
@@ -37,8 +36,8 @@ import me.phecda.sparxie.ui.navigation.rememberNavigationState
 import me.phecda.sparxie.ui.screens.client.ClientRoute
 import me.phecda.sparxie.ui.screens.client.ClientToolbarAction
 import me.phecda.sparxie.ui.screens.client.ClientViewModel
-import me.phecda.sparxie.ui.screens.licenses.LicenseDetailScreen
 import me.phecda.sparxie.ui.screens.licenses.LicensesScreen
+import me.phecda.sparxie.ui.screens.licenses.LicensesTopBarState
 import me.phecda.sparxie.ui.screens.more.MoreScreen
 import me.phecda.sparxie.ui.screens.server.ServerBindAddressScreen
 import me.phecda.sparxie.ui.screens.server.ServerRoute
@@ -71,16 +70,24 @@ fun SparxieApp() {
         topLevelRoutes = topLevelRoutes,
     )
     val navigator = remember { Navigator(navigationState) }
+    val licensesTopBarState = remember { LicensesTopBarState() }
     val currentRoute = navigationState.backStacks[navigationState.topLevelRoute]
         ?.lastOrNull()
-    val title = when (val route = currentRoute) {
+    val onBack: () -> Unit = {
+        if (currentRoute == Licenses && licensesTopBarState.canNavigateBack) {
+            licensesTopBarState.navigateBack()
+        } else {
+            navigator.goBack()
+        }
+    }
+    val title = when (currentRoute) {
         ClientHome -> stringResource(R.string.nav_client)
         ServerHome -> stringResource(R.string.nav_server)
         ServerBindAddress -> stringResource(R.string.title_bind_address)
         MoreHome -> stringResource(R.string.nav_more)
         Settings -> stringResource(R.string.title_settings)
-        Licenses -> stringResource(R.string.title_open_source_licenses)
-        is LicenseDetail -> route.licenseId
+        Licenses -> licensesTopBarState.title
+            ?: stringResource(R.string.title_open_source_licenses)
         else -> stringResource(R.string.app_name)
     }
     val isChildPage = currentRoute !in topLevelRoutes
@@ -116,16 +123,7 @@ fun SparxieApp() {
         entry<Licenses>(metadata = metadata {
             put(TopLevelRouteMetadataKey, MoreHome as NavKey)
         }) {
-            LicensesScreen(
-                onLicenseClick = { licenseId ->
-                    navigator.navigate(LicenseDetail(licenseId))
-                },
-            )
-        }
-        entry<LicenseDetail>(metadata = metadata {
-            put(TopLevelRouteMetadataKey, MoreHome as NavKey)
-        }) { route ->
-            LicenseDetailScreen(licenseId = route.licenseId)
+            LicensesScreen(topBarState = licensesTopBarState)
         }
     }
 
@@ -158,7 +156,7 @@ fun SparxieApp() {
                     },
                     navigationIcon = {
                         if (isChildPage) {
-                            IconButton(onClick = navigator::goBack) {
+                            IconButton(onClick = onBack) {
                                 Icon(
                                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                                     contentDescription = stringResource(R.string.action_back),
@@ -174,7 +172,7 @@ fun SparxieApp() {
                 entryProvider = entryProvider,
                 topLevelRoutes = topLevelRoutes,
                 contentPadding = innerPadding,
-                onBack = navigator::goBack,
+                onBack = onBack,
             )
         }
     }

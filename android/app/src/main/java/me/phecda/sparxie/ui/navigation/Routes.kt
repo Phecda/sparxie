@@ -20,6 +20,3 @@ data object Settings : NavKey
 
 @Serializable
 data object Licenses : NavKey
-
-@Serializable
-data class LicenseDetail(val licenseId: String) : NavKey
