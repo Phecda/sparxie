@@ -9,11 +9,11 @@ import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteItem
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -129,52 +129,53 @@ fun SparxieApp() {
         }
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text(title) },
-                actions = {
-                    when (currentRoute) {
-                        ClientHome -> ClientToolbarAction(viewModel = clientViewModel)
-                        ServerHome -> ServerToolbarAction(viewModel = serverViewModel)
-                    }
-                },
-                navigationIcon = {
-                    if (isChildPage) {
-                        IconButton(onClick = navigator::goBack) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = stringResource(R.string.action_back),
-                            )
-                        }
-                    }
-                },
-            )
-        },
-        bottomBar = {
-            NavigationBar {
-                topLevelDestinations.forEach { destination ->
-                    NavigationBarItem(
-                        selected = navigationState.topLevelRoute == destination.route,
-                        onClick = { navigator.navigate(destination.route) },
-                        icon = {
-                            Icon(
-                                imageVector = destination.icon,
-                                contentDescription = stringResource(destination.labelRes),
-                            )
-                        },
-                        label = { Text(stringResource(destination.labelRes)) },
-                    )
-                }
+    NavigationSuiteScaffold(
+        navigationItems = {
+            topLevelDestinations.forEach { destination ->
+                NavigationSuiteItem(
+                    selected = navigationState.topLevelRoute == destination.route,
+                    onClick = { navigator.navigate(destination.route) },
+                    icon = {
+                        Icon(
+                            imageVector = destination.icon,
+                            contentDescription = stringResource(destination.labelRes),
+                        )
+                    },
+                    label = { Text(stringResource(destination.labelRes)) },
+                )
             }
         },
-    ) { innerPadding ->
-        AppNavDisplay(
-            navigationState = navigationState,
-            entryProvider = entryProvider,
-            topLevelRoutes = topLevelRoutes,
-            contentPadding = innerPadding,
-            onBack = navigator::goBack,
-        )
+    ) {
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = { Text(title) },
+                    actions = {
+                        when (currentRoute) {
+                            ClientHome -> ClientToolbarAction(viewModel = clientViewModel)
+                            ServerHome -> ServerToolbarAction(viewModel = serverViewModel)
+                        }
+                    },
+                    navigationIcon = {
+                        if (isChildPage) {
+                            IconButton(onClick = navigator::goBack) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                    contentDescription = stringResource(R.string.action_back),
+                                )
+                            }
+                        }
+                    },
+                )
+            },
+        ) { innerPadding ->
+            AppNavDisplay(
+                navigationState = navigationState,
+                entryProvider = entryProvider,
+                topLevelRoutes = topLevelRoutes,
+                contentPadding = innerPadding,
+                onBack = navigator::goBack,
+            )
+        }
     }
 }
