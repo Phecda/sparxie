@@ -11,6 +11,7 @@
     <string name="message_settings_unavailable">设置将在后续版本中提供。</string>
     <string name="message_licenses_unavailable">许可信息将在后续版本中提供。</string>
     <string name="message_license_details_unavailable">许可详情将在后续版本中提供。</string>
+    <string name="message_select_license">请选择左侧的许可证查看详情。</string>
     <string name="message_bind_address_unavailable">绑定地址选择将在后续版本中提供。</string>
     <string name="field_server_address">服务器地址</string>
     <string name="field_server_port">服务器端口</string>

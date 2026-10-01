@@ -12,6 +12,7 @@
     <string name="message_settings_unavailable">Settings will be available in a later stage.</string>
     <string name="message_licenses_unavailable">License information will be available in a later stage.</string>
     <string name="message_license_details_unavailable">License details will be available in a later stage.</string>
+    <string name="message_select_license">Select a license on the left to view its details.</string>
     <string name="message_bind_address_unavailable">Bind address selection will be available in a later stage.</string>
     <string name="field_server_address">Server Address</string>
     <string name="field_server_port">Server Port</string>

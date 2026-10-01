@@ -1,6 +1,7 @@
 package me.phecda.sparxie.ui.screens.licenses
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -21,6 +22,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
+import me.phecda.sparxie.R
+import me.phecda.sparxie.ui.components.EmptyState
 import kotlinx.coroutines.launch
 
 @Stable
@@ -65,7 +70,9 @@ fun LicensesScreen(topBarState: LicensesTopBarState) {
         directive = navigator.scaffoldDirective,
         value = navigator.scaffoldValue,
         listPane = {
-            AnimatedPane {
+            AnimatedPane(
+                modifier = Modifier.preferredWidth(320.dp),
+            ) {
                 LicensesList(
                     selectedLicenseId = navigator.currentDestination?.contentKey,
                     onLicenseClick = { licenseId ->
@@ -81,9 +88,16 @@ fun LicensesScreen(topBarState: LicensesTopBarState) {
         },
         detailPane = {
             AnimatedPane {
-                navigator.currentDestination
-                    ?.contentKey
-                    ?.let { licenseId -> LicenseDetailScreen(licenseId = licenseId) }
+                val licenseId = navigator.currentDestination?.contentKey
+                if (licenseId == null) {
+                    EmptyState(
+                        title = stringResource(R.string.title_open_source_licenses),
+                        message = stringResource(R.string.message_select_license),
+                        modifier = Modifier.fillMaxSize(),
+                    )
+                } else {
+                    LicenseDetailScreen(licenseId = licenseId)
+                }
             }
         },
     )
@@ -94,7 +108,10 @@ private fun LicensesList(
     selectedLicenseId: String?,
     onLicenseClick: (String) -> Unit,
 ) {
-    LazyColumn(modifier = Modifier.fillMaxSize()) {
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
+    ) {
         itemsIndexed(
             items = licenseEntries,
             key = { _, license -> license.id },
