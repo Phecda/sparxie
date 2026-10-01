@@ -101,16 +101,6 @@
         }
       }
     },
-    "License information will be available here." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "许可信息将在此处提供。"
-          }
-        }
-      }
-    },
     "Licenses" : {
       "localizations" : {
         "zh-Hans" : {
@@ -171,22 +161,22 @@
         }
       }
     },
-    "Parallel Streams must be between 1 and 128." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "并行流数必须在 1 到 128 之间。"
-          }
-        }
-      }
-    },
     "Parallel Streams must be a whole number between 1 and 128." : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "并行流数必须是 1 到 128 之间的整数。"
+          }
+        }
+      }
+    },
+    "Parallel Streams must be between 1 and 128." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "并行流数必须在 1 到 128 之间。"
           }
         }
       }
@@ -261,22 +251,22 @@
         }
       }
     },
-    "Server Port must be between 1 and 65535." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "服务器端口必须在 1 到 65535 之间。"
-          }
-        }
-      }
-    },
     "Server Port must be a whole number between 1 and 65535." : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "服务器端口必须是 1 到 65535 之间的整数。"
+          }
+        }
+      }
+    },
+    "Server Port must be between 1 and 65535." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "服务器端口必须在 1 到 65535 之间。"
           }
         }
       }

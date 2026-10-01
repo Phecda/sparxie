@@ -2,11 +2,14 @@ import SwiftUI
 
 struct LicensesView: View {
     var body: some View {
-        EmptyStateView(
-            systemImage: "doc.text",
-            title: "Licenses",
-            message: "License information will be available here."
-        )
+        List(licenseEntries) { license in
+            NavigationLink {
+                LicenseDetailView(license: license)
+                    .navigationTitle(license.name)
+            } label: {
+                LabeledContent(license.name, value: license.licenseName)
+            }
+        }
         .navigationTitle("Licenses")
     }
 }
